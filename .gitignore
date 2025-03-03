@@ -169,3 +169,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# ChromaDB data directory
+chromadb/
+
+# Scraped datasets
+datasets/
