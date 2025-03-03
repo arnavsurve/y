@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator, List
 
 from sentence_transformers import SentenceTransformer
 
@@ -18,9 +19,9 @@ class VectorStore:
         self.user_store = user_store
 
     @classmethod
-    async def create(cls, chroma_client):
+    async def create(cls, chroma_client) -> "VectorStore":
         """
-        Async factory method to initialize VectorStore.
+        Async factory method for initializing VectorStore.
         """
         embedding_model = SentenceTransformer("BAAI/bge-m3")
 
@@ -29,20 +30,20 @@ class VectorStore:
 
         return cls(chroma_client, embedding_model, global_store, user_store)
 
-    async def embed_text(self, text: str):
+    async def embed_text(self, text: str) -> List[float]:
         """
         Generate embeddings for a given text.
         """
         return self.embedding_model.encode(text)
 
-    async def index_global_knowledge(self, doc_text: str):
+    async def index_global_knowledge(self, doc_text: str) -> None:
         """
         Store external knowledge in the global vector DB.
         """
         vector = await self.embed_text(doc_text)
         await self.global_store.add(documents=[{"text": doc_text}], embeddings=[vector])
 
-    async def index_user_doc(self, user_id: str, doc_text: str):
+    async def index_user_doc(self, user_id: int, doc_text: str) -> None:
         """
         Store user-uploaded documents in the user vector DB.
         """
@@ -51,7 +52,7 @@ class VectorStore:
             documents=[{"user_id": user_id, "text": doc_text}], embeddings=[vector]
         )
 
-    async def retrieve_global_knowledge(self, query: str, top_k: int = 3):
+    async def retrieve_global_knowledge(self, query: str, top_k: int = 3) -> List[str]:
         """
         Retrieve relevant external knowledge based on query.
         """
@@ -65,7 +66,9 @@ class VectorStore:
 
         return [doc["text"] for doc in results["documents"][0]]
 
-    async def retrieve_user_docs(self, user_id: str, query: str, top_k: int = 3):
+    async def retrieve_user_docs(
+        self, user_id: int, query: str, top_k: int = 3
+    ) -> List[str]:
         """
         Retrieve relevant user-specific documents.
         """
@@ -80,7 +83,7 @@ class VectorStore:
         return [
             doc["text"]
             for doc in results["documents"][0]
-            if "user_id" in doc and doc["user_id"] == user_id
+            if "user_id" in doc and doc["user_id"] == str(user_id)
         ]
 
 
@@ -93,7 +96,7 @@ async def get_chroma_client():
         pass
 
 
-async def get_vector_store():
+async def get_vector_store() -> AsyncGenerator[VectorStore, None]:
     """
     Dependency injection for ChromaDB vector store.
     """
