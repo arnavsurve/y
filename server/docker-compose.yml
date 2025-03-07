@@ -19,7 +19,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: app
+    container_name: y_server
     restart: always
     # environment:
     # POSTGRES_USER: ${POSTGRES_USER}
