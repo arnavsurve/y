@@ -8,6 +8,10 @@ class Settings(BaseSettings):
     app_port: int
     chroma_port: int
     groq_api_key: str
+    xai_api_key: str
+    gemini_api_key: str
+    chroma_global_store: str
+    chroma_user_store: str
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
